@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QString>
+#include <QStringList>
 #include "mythread.h"
 
 namespace Ui {
@@ -19,12 +20,14 @@ public:
     ~MainWindow();
 private:
 
-    Ui::MainWindow *ui;
-    QTimer *m_pTimer;
-    QTimer *m_pRequestTimer;
-    QString m_strBanner;
-    mythread  *m_pThread;
-
+    Ui::MainWindow      *ui;
+    QTimer              *m_pTimer;
+    QTimer              *m_pRequestTimer;
+    QTimer              *m_pSliceTimer;
+    QString              m_strBanner;
+    mythread            *m_pThread;
+    QStringList          m_imageList;
+    int                  m_imageIdx;
 private slots:
 
     void on_error();
@@ -32,6 +35,7 @@ private slots:
     void on_request_timer();
     void on_dataReady(QByteArray data);
     void on_sended();
+    void on_slicerTimer();
 };
 
 #endif // MAINWINDOW_H

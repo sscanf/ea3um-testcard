@@ -18,7 +18,8 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
-	background-image: url(/mnt/imagen/carta.jpg)
+	background-image: url(/mnt/imagen/carta.jpg);
+	background-color: black;
 }
 
 
