@@ -39,7 +39,7 @@ void banner::setAlignment(Qt::Alignment al)
 }
 void banner::refreshLabel()
 {
-    repaint();
+    this->repaint();
 }
 
 void banner::setSpeed(int s)
@@ -83,6 +83,8 @@ void banner::updateCoordinates()
 
 void banner::paintEvent(QPaintEvent *e)
 {
+    Q_UNUSED (e)
+
     QPainter p(this);
     if(m_direction==RightToLeft)
     {

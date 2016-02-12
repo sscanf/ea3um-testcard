@@ -5,7 +5,7 @@
 #include <QTimer>
 #include <QString>
 #include <QStringList>
-#include "mythread.h"
+#include "capturethread.h"
 
 namespace Ui {
 class MainWindow;
@@ -17,7 +17,10 @@ class MainWindow : public QMainWindow
     
 public:
     explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    ~MainWindow();    
+
+private:
+
 private:
 
     Ui::MainWindow      *ui;
@@ -25,17 +28,20 @@ private:
     QTimer              *m_pRequestTimer;
     QTimer              *m_pSliceTimer;
     QString              m_strBanner;
-    mythread            *m_pThread;
     QStringList          m_imageList;
     int                  m_imageIdx;
+    captureThread       *m_pCaptureThrd;
+
 private slots:
 
     void on_error();
     void on_timeout();
-    void on_request_timer();
     void on_dataReady(QByteArray data);
     void on_sended();
     void on_slicerTimer();
+    void on_drawFrames(QImage video);
+    void on_cameraConnected();
+    void on_cameraDisconnected();
 };
 
 #endif // MAINWINDOW_H

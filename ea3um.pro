@@ -4,7 +4,10 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui multimedia
+LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc
+
+INCLUDEPATH += usr/include/opencv2/
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -15,13 +18,11 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     banner.cpp \
-    gpio.cpp \
-    mythread.cpp
+    capturethread.cpp
 
 HEADERS  += mainwindow.h \
     banner.h \
-    gpio.h \
-    mythread.h
+    capturethread.h
 
 FORMS    += mainwindow.ui
 

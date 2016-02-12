@@ -10,7 +10,6 @@
 #include <QDebug>
 #include <QByteArray>
 #include <QDir>
-
 #include <banner.h>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -30,22 +29,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QSettings settings("/mnt/config/carta.ini",QSettings::IniFormat);
 
-    enabled     = settings.value ("banner/enabled",1).toBool();
-    text        = settings.value ("banner/text","Ea3um carta ATV").toString();
-    color       = settings.value ("banner/color","white").toString();
-    speed       = settings.value ("banner/speed",2).toInt();
+    enabled     = settings.value ("banner/enabled"  ,1).toBool();
+    text        = settings.value ("banner/text"     ,"Ea3um carta ATV").toString();
+    color       = settings.value ("banner/color"    ,"white").toString();
+    speed       = settings.value ("banner/speed"    ,2).toInt();
     direction   = settings.value ("banner/direction",0).toInt();
-    diapo       = settings.value ("carta/diapo",0).toBool();
+    diapo       = settings.value ("carta/diapo"     ,0).toBool();
 
     ui->setupUi (this);
+
+    ui->lblvideo->hide();
     m_pTimer=new QTimer (this);
     connect (m_pTimer,SIGNAL (timeout()),this,SLOT(on_timeout()));
     m_pTimer->start (5000);
 
-/*    m_pRequestTimer = new QTimer(this);
-    connect (m_pRequestTimer,SIGNAL (timeout()),this,SLOT(on_request_timer()));
-    m_pRequestTimer->start(7000);
-*/
     if (enabled==true){
         ui->mybanner->setText (text);
         ui->mybanner->setSpeed(speed);
@@ -54,14 +51,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
         QString style = QString ("QLabel { background:none; color : %1; }").arg(color);
         ui->mybanner->setStyleSheet(style);
+        ui->mybanner->show();
     }
-/*
-    m_pThread = new mythread (this);
-    connect (m_pThread,SIGNAL (messageRx(QByteArray)),this,SLOT(on_dataReady(QByteArray)));
-    connect (m_pThread,SIGNAL (error()),this,SLOT(on_error()));
-    connect (m_pThread,SIGNAL (sended()),this,SLOT(on_sended()));
-    m_pThread->start();//(QThread::HighestPriority);
-*/
+
+    m_pCaptureThrd = new captureThread(this);
+    connect (m_pCaptureThrd, SIGNAL (imageReady(QImage)), this, SLOT (on_drawFrames(QImage)));
+    connect (m_pCaptureThrd, SIGNAL (cameraConnected()), this, SLOT (on_cameraConnected()));
+    connect (m_pCaptureThrd, SIGNAL (cameraDisconnected()), this, SLOT (on_cameraDisconnected()));
+    m_pCaptureThrd->start();
 
     if (diapo == true){
         QDir dir ("/mnt/imagen");
@@ -103,15 +100,30 @@ void MainWindow::on_slicerTimer()
     }
 }
 
+void MainWindow::on_drawFrames(QImage video)
+{
+    ui->lblvideo->setPixmap(QPixmap::fromImage(video));
+}
+
+void MainWindow::on_cameraConnected()
+{
+    QString strStyle = "QWidget {\n	background-image: ''; background-repeat: no-repeat; background-color: black};";
+    ui->lblvideo->show();
+    this->setStyleSheet(strStyle);
+}
+
+void MainWindow::on_cameraDisconnected()
+{
+    ui->lblvideo->hide();
+    QString strStyle = "QWidget {\nbackground-image: url(/mnt/imagen/carta.jpg); background-repeat: no-repeat; background-color: black};";
+    this->setStyleSheet(strStyle);
+
+}
+
 void MainWindow::on_error()
 {
     qDebug() << "Error";
     ui->mybanner->pause(false);
-}
-
-void MainWindow::on_request_timer()
-{
-    m_pThread->send_status();
 }
 
 void MainWindow::on_timeout()
