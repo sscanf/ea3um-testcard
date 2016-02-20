@@ -1,6 +1,9 @@
 #include <QDebug>
 #include "capturethread.h"
 #include <QCameraInfo>
+#include <QCameraImageCapture>
+#include <QDir>
+
 captureThread::captureThread(QObject *parent) :
     QThread(parent)
 {
@@ -9,14 +12,16 @@ captureThread::captureThread(QObject *parent) :
 void captureThread::run()
 {
     while(1){
+
         while (QCameraInfo::availableCameras().count() == 0)
             msleep(1000);
 
         capWebcam.open(-1);
+
         emit cameraConnected();
 
-        capWebcam.set(CV_CAP_PROP_FRAME_WIDTH,400);
-        capWebcam.set(CV_CAP_PROP_FRAME_HEIGHT,300);
+        capWebcam.set(CV_CAP_PROP_FRAME_WIDTH,720);
+        capWebcam.set(CV_CAP_PROP_FRAME_HEIGHT,513);
 
         do
         {

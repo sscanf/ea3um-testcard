@@ -17,7 +17,8 @@ class MainWindow : public QMainWindow
     
 public:
     explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();    
+    void showSlide(bool bShow);
+    ~MainWindow();
 
 private:
 
@@ -26,17 +27,17 @@ private:
     Ui::MainWindow      *ui;
     QTimer              *m_pTimer;
     QTimer              *m_pRequestTimer;
-    QTimer              *m_pSliceTimer;
+    QTimer              *m_pSlideTimer;
     QString              m_strBanner;
     QStringList          m_imageList;
     int                  m_imageIdx;
     captureThread       *m_pCaptureThrd;
+    bool                 m_bDiapo;
+    int                  m_timelapse;
 
 private slots:
-
     void on_error();
     void on_timeout();
-    void on_dataReady(QByteArray data);
     void on_sended();
     void on_slicerTimer();
     void on_drawFrames(QImage video);

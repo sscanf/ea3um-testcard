@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>713</width>
+    <width>720</width>
     <height>577</height>
    </rect>
   </property>
@@ -26,6 +26,18 @@
 </string>
   </property>
   <widget class="QWidget" name="centralWidget">
+   <property name="minimumSize">
+    <size>
+     <width>720</width>
+     <height>577</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>720</width>
+     <height>577</height>
+    </size>
+   </property>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
@@ -58,6 +70,9 @@ color:white;</string>
     </property>
    </widget>
    <widget class="banner" name="mybanner">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -86,7 +101,7 @@ color:white;</string>
      <enum>QFrame::NoFrame</enum>
     </property>
     <property name="text">
-     <string/>
+     <string>Prueba</string>
     </property>
     <property name="scaledContents">
      <bool>false</bool>
@@ -98,22 +113,22 @@ color:white;</string>
    <widget class="QLabel" name="lblvideo">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>110</y>
-      <width>400</width>
-      <height>300</height>
+      <x>0</x>
+      <y>0</y>
+      <width>720</width>
+      <height>577</height>
      </rect>
     </property>
     <property name="minimumSize">
      <size>
-      <width>400</width>
-      <height>300</height>
+      <width>0</width>
+      <height>0</height>
      </size>
     </property>
     <property name="maximumSize">
      <size>
-      <width>400</width>
-      <height>300</height>
+      <width>720</width>
+      <height>577</height>
      </size>
     </property>
     <property name="autoFillBackground">
@@ -122,7 +137,13 @@ color:white;</string>
     <property name="text">
      <string/>
     </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
    </widget>
+   <zorder>lblvideo</zorder>
+   <zorder>label</zorder>
+   <zorder>mybanner</zorder>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

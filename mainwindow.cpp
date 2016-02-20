@@ -13,6 +13,8 @@
 #include <banner.h>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QCameraInfo>
+#include <QCameraImageCapture>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -21,11 +23,12 @@ MainWindow::MainWindow(QWidget *parent) :
     m_imageIdx=0;
 
     bool    enabled;
-    bool    diapo;
     QString text;
     QString color;
     int     speed;
     int     direction;
+    int     width;
+    int     height;
 
     QSettings settings("/mnt/config/carta.ini",QSettings::IniFormat);
 
@@ -34,16 +37,23 @@ MainWindow::MainWindow(QWidget *parent) :
     color       = settings.value ("banner/color"    ,"white").toString();
     speed       = settings.value ("banner/speed"    ,2).toInt();
     direction   = settings.value ("banner/direction",0).toInt();
-    diapo       = settings.value ("carta/diapo"     ,0).toBool();
+    m_bDiapo    = settings.value ("slide/enabled"   ,false).toBool();
+    m_timelapse = settings.value ("slide/timelapse" ,1).toBool();
+    width       = settings.value ("video/width"     ,640).toInt();
+    height      = settings.value ("video/height"    ,480).toInt();
 
     ui->setupUi (this);
-
     ui->lblvideo->hide();
+
+    int screenWidth = this->width();
+    int screenHeight = this->height();
+    ui->lblvideo->setGeometry((screenWidth/2)-(width/2),(screenHeight/2)-(height/2),width,height);
+
     m_pTimer=new QTimer (this);
     connect (m_pTimer,SIGNAL (timeout()),this,SLOT(on_timeout()));
     m_pTimer->start (5000);
 
-    if (enabled==true){
+    if (enabled==true) {
         ui->mybanner->setText (text);
         ui->mybanner->setSpeed(speed);
         ui->mybanner->setDirection(direction);
@@ -60,27 +70,28 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (m_pCaptureThrd, SIGNAL (cameraDisconnected()), this, SLOT (on_cameraDisconnected()));
     m_pCaptureThrd->start();
 
-    if (diapo == true){
-        QDir dir ("/mnt/imagen");
-        dir.setNameFilters( QStringList ("*.jpg"));
-        dir.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
-        m_imageList = dir.entryList();
+    m_pSlideTimer = new QTimer(this);
+    connect (m_pSlideTimer,SIGNAL (timeout()),this,SLOT(on_slicerTimer()));
 
-        m_pSliceTimer = new QTimer(this);
-        connect (m_pTimer,SIGNAL (timeout()),this,SLOT(on_slicerTimer()));
-        m_pSliceTimer->start (1000);
-    }
-}
-
-void MainWindow::on_dataReady(QByteArray data)
-{
-    ui->mybanner->pause(false);
-    qDebug() << "Datos recibidos : " << data.toHex();
+    QDir dir ("/mnt/imagen");
+    dir.setNameFilters( QStringList ("*.jpg"));
+    dir.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+    m_imageList = dir.entryList();
+    showSlide(m_bDiapo);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::showSlide(bool bShow)
+{
+    if ( bShow == true )
+        m_pSlideTimer->start (m_timelapse*1000);
+    else
+        m_pSlideTimer->stop();
+
 }
 
 void MainWindow::on_sended()
@@ -102,14 +113,16 @@ void MainWindow::on_slicerTimer()
 
 void MainWindow::on_drawFrames(QImage video)
 {
+
     ui->lblvideo->setPixmap(QPixmap::fromImage(video));
 }
 
 void MainWindow::on_cameraConnected()
 {
-    QString strStyle = "QWidget {\n	background-image: ''; background-repeat: no-repeat; background-color: black};";
     ui->lblvideo->show();
+    QString strStyle = "QWidget {\n	background-image: ''; background-repeat: no-repeat; background-color: black};";
     this->setStyleSheet(strStyle);
+    showSlide(false);
 }
 
 void MainWindow::on_cameraDisconnected()
@@ -117,12 +130,11 @@ void MainWindow::on_cameraDisconnected()
     ui->lblvideo->hide();
     QString strStyle = "QWidget {\nbackground-image: url(/mnt/imagen/carta.jpg); background-repeat: no-repeat; background-color: black};";
     this->setStyleSheet(strStyle);
-
+    showSlide(m_bDiapo);
 }
 
 void MainWindow::on_error()
 {
-    qDebug() << "Error";
     ui->mybanner->pause(false);
 }
 
