@@ -1,16 +1,19 @@
-#include "mainwindow.h"
-#include <QApplication>
-#include <QCursor>
-#include <QFont>
-#include <QFontDatabase>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QObject>
+#include <QQmlContext>
+#include "settings.h"
+
+Q_DECLARE_METATYPE(Settings*)
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    a.setOverrideCursor(QCursor(Qt::BlankCursor));
+    QGuiApplication app(argc, argv);
 
-    MainWindow w;
+    QQmlApplicationEngine engine;
+    Settings *settings = new Settings ();
+    engine.rootContext()->setContextProperty("Settings",settings);
+    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-    w.show();
-    return a.exec();
+    return app.exec();
 }

@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Banner.qml</file>
+        <file>MarqueeText.qml</file>
+        <file>CoverFlow.qml</file>
+        <file>Cover.qml</file>
+    </qresource>
+</RCC>

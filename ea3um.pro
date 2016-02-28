@@ -1,35 +1,22 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2014-03-24T20:33:32
-#
-#-------------------------------------------------
-
-QT       += core gui multimedia
-LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc
-
-INCLUDEPATH += usr/include/opencv2/
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
-TARGET = ea3um
 TEMPLATE = app
 
+QT += qml quick
+CONFIG += c++11
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    banner.cpp \
-    capturethread.cpp
+SOURCES += main.cpp \
+    settings.cpp
 
-HEADERS  += mainwindow.h \
-    banner.h \
-    capturethread.h
+RESOURCES += qml.qrc
 
-FORMS    += mainwindow.ui
+QML_IMPORT_PATH =
 
+# Default rules for deployment.
+include(deployment.pri)
+
+HEADERS += \
+    settings.h
 
 linux-* {
     target.path = /usr/sbin
     INSTALLS += target
 }
-
-RESOURCES +=
