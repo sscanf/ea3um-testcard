@@ -2,6 +2,7 @@ import QtQuick 2.5
 import QtMultimedia 5.5
 import QtQuick.Window 2.2
 import Qt.labs.folderlistmodel 2.1
+import OFilter 1.0
 
 Window {
     property int idx;
@@ -9,30 +10,37 @@ Window {
     property int slideEnabled;
     property int videoEnabled;
 
-    visible : true
-    id      : mainPage
-    width   : Screen.width;
-    height  : Screen.height;
-    color   : "black"
-    idx     : 0
+    visible     : true
+    id          : mainPage
+    width       : Screen.width;
+    height      : Screen.height;
+    color       : "black"
+    idx         : 0
     timelapse   : 3000
     slideEnabled: 0
     videoEnabled: 1
 
     Component.onCompleted: {
-        banner.enabled      = Settings.value ("banner/enabled",1);
-        banner.text         = Settings.value ("banner/text","EA3UM carta ATV ** ");
-        timelapse           = Settings.value ("slide/timelapse","3000")*1000;
-        slideEnabled        = Settings.value ("slide/enabled","0");
-        videoEnabled        = Settings.value ("video/enabled","1");
+        banner.enabled  = Settings.value ("banner/enabled",1);
+        banner.text     = Settings.value ("banner/text","EA3UM carta ATV ** ");
+        timelapse       = Settings.value ("slide/timelapse","3000")*1000;
+        slideEnabled    = Settings.value ("slide/enabled","0");
+        videoEnabled    = Settings.value ("video/enabled","1");
 
-        console.log (timelapse);
-        console.log (slideEnabled);
-        if (camera.availability == 0 && videoEnabled == 1){
+        if (camera.availability === 0 && videoEnabled === 1){
+            timer.stop()
             camara.opacity=1
             flipable.opacity=0
         }
-        cardImageFront.source = "file://mnt/imagen/carta.jpg"
+
+        if (videoEnabled === 0)
+            camera.stop();
+
+        if (slideEnabled === 0) {
+            cardImageFront.source = "file://mnt/imagen/carta.jpg";
+            cardImageBack.source = "file://mnt/imagen/carta.jpg";
+            timer.stop();
+         }
     }
 
     Rectangle{
@@ -49,11 +57,13 @@ Window {
             back:  Image {id: cardImageBack;  anchors.fill: parent}
 
             transform: Rotation {
-                id: rotation
+                id      : rotation
                 origin.x: flipable.width/2
                 origin.y: flipable.height/2
-                axis.x: 0; axis.y: 1; axis.z: 0
-                angle: 0
+                axis.x  : 0;
+                axis.y  : 1;
+                axis.z  : 0
+                angle   : 0
             }
 
             states: State {
@@ -63,16 +73,14 @@ Window {
             }
 
             transitions: Transition {
-                NumberAnimation { target: rotation; property: "angle"; duration: 1000 }
+                NumberAnimation { target: rotation; property: "angle"; easing.period: 0.5; easing.type: Easing.OutElastic; duration: 1500 }
             }
-
         }
 
-        Rectangle{
+        Rectangle {
             id      : camara
             opacity : 0
             color   : "black"
-//            border.color: "black"
             visible : true
             width   : 640
             height  : 480
@@ -84,33 +92,43 @@ Window {
                 id  : camera
             }
 
+//            MyFilter {
+//                id        : filter
+//                onFinished: console.log ("Finished result = " + result);
+//            }
+
             VideoOutput {
                 source      : camera
+//                filters     : [filter]
                 anchors.fill: parent
                 focus       : visible // to receive focus and capture key events when visible
             }
         }
 
         Timer {
-            id      : timer
-            interval: timelapse
-            running : slideEnabled
-            repeat  : true
+            id                  : timer
+            interval            : timelapse
+            running             : slideEnabled
+            triggeredOnStart    : true
+            repeat              : true
+
             onTriggered: {
 
-                console.log (model.get(idx,"fileName"))
+                do {
+                    var fileName = model.get(idx,"fileName");
+                    console.log ("'"+fileName+"'")
+                    idx = (idx + 1) % model.count;
+                }while ( fileName === undefined );
 
-                if (model.get(idx,"fileName") !== "undefined"){
-                    if (!flipable.flipped){
-                        cardImageBack.source = "file://mnt/imagen/"+model.get(idx++,"fileName");
-                    }
+                if ( fileName !== undefined) {
+                    if (!flipable.flipped)
+                        cardImageBack.source = "file://mnt/imagen/"+fileName;
                     else
-                        cardImageFront.source = "file://mnt/imagen/"+model.get(idx++,"fileName");
-
-                    flipable.flipped = !flipable.flipped
+                        cardImageFront.source = "file://mnt/imagen/"+fileName;
                 }
-                if (idx>model.count)
-                    idx=0;
+                if (model.count>1) {
+                   flipable.flipped = !flipable.flipped
+                }
             }
         }
 
@@ -133,7 +151,7 @@ Window {
     FolderListModel {
         id: model
         showDirs    : false
-        folder  : "file:///mnt/imagen/"
+        folder      : "file:///mnt/imagen/"
         nameFilters : ["*.jpg","*.png"]
     }
 }
